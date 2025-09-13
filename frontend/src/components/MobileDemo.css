@@ -1,12 +1,15 @@
 /* iPhone Mockup Styles */
 .iphone-mockup {
-  background: linear-gradient(145deg, #2c2c2e, #1c1c1e);
+  background: linear-gradient(145deg, #1d1d1f, #2c2c2e);
   box-shadow: 
-    0 0 0 8px #1d1d1f,
-    0 0 0 10px #2c2c2e,
-    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 2px #1d1d1f,
+    0 0 0 4px #2c2c2e,
+    0 0 0 6px #1d1d1f,
+    0 0 0 8px #2c2c2e,
+    0 20px 40px rgba(0, 0, 0, 0.4),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   position: relative;
+  border-radius: 3rem;
 }
 
 .iphone-screen {
@@ -18,6 +21,8 @@
 .iphone-status-bar {
   background: linear-gradient(180deg, #000 0%, #1a1a1a 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* Carousel Styles */

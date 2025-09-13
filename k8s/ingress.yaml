@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: medlens-ingress
+  namespace: medlens-waitlist
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "medlens-ip"
+    networking.gke.io/managed-certificates: "medlens-ssl-cert"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: medlens.yourdomain.com  # Replace with your domain
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: medlens-backend-service
+            port:
+              number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: medlens-frontend-service
+            port:
+              number: 80
+  # Uncomment when you have a domain
+  # tls:
+  # - hosts:
+  #   - medlens.yourdomain.com
+  #   secretName: medlens-tls

@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: medlens-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: medlens-waitlist
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - medlens-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medlens-backend
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      NODE_ENV: development
+      PORT: 5001
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/medlens-waitlist?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - medlens-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: medlens-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - medlens-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  medlens-network:
+    driver: bridge

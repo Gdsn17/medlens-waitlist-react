@@ -42,7 +42,7 @@ const Header: React.FC = () => {
               About
             </button>
             <button
-              onClick={() => scrollToSection('referral-program')}
+              onClick={() => scrollToSection('referral')}
               className="text-gray-700 hover:text-primary-500 font-medium transition-colors duration-200"
             >
               Referral Program

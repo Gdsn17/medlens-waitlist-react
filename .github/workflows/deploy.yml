@@ -1,0 +1,94 @@
+name: Build and Deploy to GKE
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GKE_CLUSTER: medlens-cluster
+  GKE_ZONE: us-central1-a
+  DEPLOYMENT_NAME: medlens-waitlist
+  REGION: us-central1
+  REPOSITORY: medlens-waitlist
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Configure Docker to use gcloud as a credential helper
+      run: |
+        gcloud auth configure-docker $REGION-docker.pkg.dev
+
+    - name: Build and push Frontend image
+      run: |
+        cd frontend
+        docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:$GITHUB_SHA .
+        docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:$GITHUB_SHA
+        docker tag $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:$GITHUB_SHA $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:latest
+        docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:latest
+
+    - name: Build and push Backend image
+      run: |
+        cd backend
+        docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:$GITHUB_SHA .
+        docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:$GITHUB_SHA
+        docker tag $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:$GITHUB_SHA $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:latest
+        docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Configure kubectl
+      run: |
+        gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $PROJECT_ID
+
+    - name: Update image tags in Kubernetes manifests
+      run: |
+        # Update frontend deployment
+        sed -i "s|us-central1-docker.pkg.dev/YOUR_PROJECT_ID/medlens-waitlist/frontend:latest|$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:$GITHUB_SHA|g" k8s/frontend-deployment.yaml
+        
+        # Update backend deployment
+        sed -i "s|us-central1-docker.pkg.dev/YOUR_PROJECT_ID/medlens-waitlist/backend:latest|$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:$GITHUB_SHA|g" k8s/backend-deployment.yaml
+
+    - name: Deploy to GKE
+      run: |
+        kubectl apply -f k8s/namespace.yaml
+        kubectl apply -f k8s/mongodb-secret.yaml
+        kubectl apply -f k8s/backend-deployment.yaml
+        kubectl apply -f k8s/backend-service.yaml
+        kubectl apply -f k8s/frontend-deployment.yaml
+        kubectl apply -f k8s/frontend-service.yaml
+        kubectl apply -f k8s/ingress.yaml
+
+    - name: Verify deployment
+      run: |
+        kubectl get pods -n medlens-waitlist
+        kubectl get services -n medlens-waitlist
+        kubectl get ingress -n medlens-waitlist
