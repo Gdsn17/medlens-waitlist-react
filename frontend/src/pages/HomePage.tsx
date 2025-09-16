@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import '../components/MobileDemo.css';
+import { saveWaitlistForm } from '../services/firestoreService';
 
 interface FormData {
   fullName: string;
@@ -66,7 +67,6 @@ const HomePage: React.FC = () => {
 
   // Search History Categories State
   const [showHistoryAnimation, setShowHistoryAnimation] = useState(false);
-  const [showHistoryPage, setShowHistoryPage] = useState(false);
   const searchCategories = [
     {
       id: 'anatomy',
@@ -123,14 +123,14 @@ const HomePage: React.FC = () => {
   ];
 
   // Demo slides configuration
-  const demoSlides = [
+  const demoSlides = useMemo(() => [
     { id: 'scanning', name: 'Scanning' },
     { id: 'analyzing', name: 'AI Analyzing' },
     { id: 'explanation', name: 'Explanation' },
     { id: 'history', name: 'History' },
     { id: 'categories', name: 'Categories' },
     { id: 'saved', name: 'Saved Terms' }
-  ];
+  ], []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -162,19 +162,21 @@ const HomePage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/waitlist/join', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      console.log('🚀 Submitting form to Firestore...');
+      console.log('Form data:', formData);
+      
+      // Use Firestore service to save the form data directly
+      const result = await saveWaitlistForm(formData);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setUserReferralCode(data.referralCode);
+      if (result.success) {
+        console.log('✅ Form submitted successfully:', result.data);
+        
+        // Generate a simple referral code (you can enhance this later)
+        const referralCode = `ML${Date.now().toString().slice(-6)}`;
+        setUserReferralCode(referralCode);
         setSubmitted(true);
+        
+        // Clear the form
         setFormData({
           fullName: '',
           email: '',
@@ -187,12 +189,16 @@ const HomePage: React.FC = () => {
           otherGoals: '',
           otherStruggles: ''
         });
+        
+        console.log('🎉 Success! User joined waitlist with referral code:', referralCode);
       } else {
-        alert(data.message || 'Error submitting form');
+        console.error('❌ Form submission failed:', result.message);
+        alert(result.message || 'Error submitting form');
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Error submitting form');
+      console.error('❌ Error submitting form:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Error submitting form: ${errorMessage}. Please check your internet connection and try again.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -206,14 +212,14 @@ const HomePage: React.FC = () => {
   };
 
   // Mobile Demo Functions
-  const nextDemoStep = () => {
+  const nextDemoStep = useCallback(() => {
     setCurrentDemoStep((prev) => (prev + 1) % demoSlides.length);
     // Only show history animation for specific slides
     if (demoSlides[currentDemoStep]?.id === 'history' || demoSlides[currentDemoStep]?.id === 'categories') {
       setShowHistoryAnimation(true);
       setTimeout(() => setShowHistoryAnimation(false), 1000);
     }
-  };
+  }, [currentDemoStep, demoSlides]);
 
   const prevDemoStep = () => {
     setCurrentDemoStep((prev) => (prev - 1 + demoSlides.length) % demoSlides.length);
@@ -225,7 +231,6 @@ const HomePage: React.FC = () => {
   };
 
   const handleHistoryClick = () => {
-    setShowHistoryPage(true);
     setCurrentDemoStep(3); // Go to history slide
   };
 
@@ -402,8 +407,8 @@ const HomePage: React.FC = () => {
                               </div>
                             </div>
                           </div>
-                        </div>
-                        
+                    </div>
+                    
                         {/* Camera Icon at Bottom */}
                         <div className="flex justify-center pb-6">
                           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
@@ -501,8 +506,8 @@ const HomePage: React.FC = () => {
                               </div>
                             ))}
                           </div>
-                        </div>
-                        
+                      </div>
+                      
                         {/* Bottom Action Bar */}
                         <div className="bg-gray-100 px-4 py-3 border-t border-gray-200">
                           <div className="flex items-center justify-between">
@@ -548,9 +553,9 @@ const HomePage: React.FC = () => {
                                 <p className="text-white/80 text-xs">{category.searches.length} searches</p>
                               </div>
                             ))}
-                          </div>
-                        </div>
-                        
+                      </div>
+                    </div>
+                    
                         {/* Bottom Action Bar */}
                         <div className="bg-gray-100 px-4 py-3 border-t border-gray-200">
                           <div className="flex items-center justify-between">

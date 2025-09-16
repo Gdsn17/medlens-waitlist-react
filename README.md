@@ -1,36 +1,48 @@
-# MedLens Waitlist Landing Page
+# MedLens Waitlist
 
-A modern, responsive waitlist landing page for MedLens - an AI-powered medical education tool. Built with React, Node.js, and MongoDB.
+A modern waitlist application for MedLens - an AI-powered tool that simplifies complex medical terms for students and healthcare professionals.
 
-## Features
+## 🚀 Live Demo
 
-- 🎯 **Waitlist Signup Form** - Collect user information with referral system
-- 📊 **Survey Page** - Gather user goals and study methods
-- 🎁 **Referral Program** - Reward system with multiple tiers
-- 📱 **Responsive Design** - Mobile-first approach with Tailwind CSS
-- 🚀 **Modern UI/UX** - Clean, professional design with smooth animations
+- **Frontend:** https://medlensai-waitlist.web.app
+- **Backend API:** Running on Cloud Run (port 8080)
+- **Database:** Firebase Firestore
 
-## Tech Stack
+## 🏗️ Architecture
 
-### Frontend
-- React 18 with TypeScript
-- Tailwind CSS for styling
-- React Router for navigation
-- Axios for API calls
+- **Frontend:** React + TypeScript + Tailwind CSS
+- **Backend:** Node.js + Express.js
+- **Database:** Firebase Firestore
+- **Hosting:** Firebase Hosting (Frontend) + Cloud Run (Backend)
+- **Deployment:** Free tier only
 
-### Backend
-- Node.js with Express
-- MongoDB with Mongoose
-- CORS enabled for cross-origin requests
+## 📁 Project Structure
 
-## Quick Start
+```
+medlens-waitlist/
+├── frontend/                 # React frontend application
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   ├── pages/           # Page components
+│   │   └── services/        # API services
+│   └── public/              # Static assets
+├── backend/                 # Node.js backend API
+│   ├── routes/              # API route handlers
+│   ├── models/              # Data models
+│   └── server.js            # Main server file
+├── functions/               # Firebase Functions (alternative backend)
+└── firebase.json            # Firebase configuration
+```
+
+## 🛠️ Development Setup
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (local or cloud instance)
-- npm or yarn
 
-### Installation
+- Node.js 18+
+- Firebase CLI
+- Google Cloud SDK (for deployment)
+
+### Local Development
 
 1. **Clone the repository**
    ```bash
@@ -38,160 +50,94 @@ A modern, responsive waitlist landing page for MedLens - an AI-powered medical e
    cd medlens-waitlist
    ```
 
-2. **Install frontend dependencies**
+2. **Install dependencies**
    ```bash
-   cd frontend
+   # Install root dependencies
    npm install
+   
+   # Install frontend dependencies
+   cd frontend && npm install
+   
+   # Install backend dependencies
+   cd ../backend && npm install
    ```
 
-3. **Install backend dependencies**
+3. **Start development servers**
    ```bash
-   cd ../backend
-   npm install
+   # Start backend (port 8080)
+   cd backend && npm start
+   
+   # Start frontend (port 3000)
+   cd frontend && npm start
    ```
 
-4. **Set up environment variables**
-   Create a `.env` file in the backend directory:
-   ```env
-   PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/medlens-waitlist
-   NODE_ENV=development
-   ```
+4. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8080
 
-5. **Start MongoDB**
-   Make sure MongoDB is running on your system.
+## 🚀 Deployment
 
-6. **Start the backend server**
-   ```bash
-   cd backend
-   npm run dev
-   ```
-
-7. **Start the frontend development server**
-   ```bash
-   cd frontend
-   npm start
-   ```
-
-The application will be available at `http://localhost:3000`
-
-## Project Structure
-
-```
-medlens-waitlist/
-├── frontend/                 # React frontend
-│   ├── src/
-│   │   ├── components/      # Reusable components
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API services
-│   │   └── types/          # TypeScript types
-│   └── public/             # Static assets
-├── backend/                 # Node.js backend
-│   ├── models/             # MongoDB models
-│   ├── routes/             # API routes
-│   └── server.js           # Main server file
-└── README.md
-```
-
-## API Endpoints
-
-### Waitlist
-- `POST /api/waitlist/join` - Join the waitlist
-- `GET /api/waitlist/referral/:code` - Get referral info
-- `GET /api/waitlist/stats` - Get waitlist statistics
-
-### Survey
-- `POST /api/survey/submit` - Submit survey response
-- `GET /api/survey/stats` - Get survey statistics
-
-## Features Overview
-
-### 1. Landing Page
-- Hero section with app mockup
-- Feature highlights
-- Call-to-action buttons
-- How it works section
-
-### 2. Waitlist Form
-- User information collection
-- Year of study selection
-- Beta tester opt-in
-- Referral code support
-- Success page with referral code
-
-### 3. Survey Page
-- Goals and study methods questions
-- Multiple choice with "Other" options
-- Form validation
-- Success confirmation
-
-### 4. Referral Program
-- Three-tier reward system
-- Visual reward cards
-- How it works explanation
-- Call-to-action
-
-### 5. About Page
-- Company mission
-- Feature showcase
-- AI assistant demo
-- Statistics section
-
-## Styling
-
-The project uses Tailwind CSS for styling with:
-- Custom color palette (primary blue, secondary green)
-- Responsive design patterns
-- Smooth animations and transitions
-- Modern gradient backgrounds
-- Consistent spacing and typography
-
-## Database Schema
-
-### WaitlistUser
-- fullName: String
-- email: String (unique)
-- yearOfStudy: String
-- isBetaTester: Boolean
-- referralCode: String (unique)
-- referredBy: String
-- referralCount: Number
-- joinedAt: Date
-
-### SurveyResponse
-- email: String
-- goals: [String]
-- studyMethods: [String]
-- otherGoals: String
-- otherStudyMethods: String
-- submittedAt: Date
-
-## Development
-
-### Frontend Development
+### Frontend (Firebase Hosting)
 ```bash
-cd frontend
-npm start
+./deploy-frontend.sh <BACKEND_API_URL>
 ```
 
-### Backend Development
+### Backend (Cloud Run)
 ```bash
-cd backend
-npm run dev
+./deploy-backend.sh
 ```
 
-### Building for Production
+### Free Tier Deployment
 ```bash
-# Frontend
-cd frontend
-npm run build
-
-# Backend
-cd backend
-npm start
+./deploy-free.sh
 ```
 
-## Contributing
+## 📊 Database Schema
+
+### waitlistUsers Collection
+```javascript
+{
+  fullName: string,
+  email: string,
+  yearOfStudy: string,
+  isBetaTester: boolean,
+  referralCode: string,
+  goals: string[],
+  studyMethods: string[],
+  struggles: string[],
+  otherGoals: string,
+  otherStruggles: string,
+  createdAt: timestamp,
+  updatedAt: timestamp,
+  timestamp: string
+}
+```
+
+## 🔧 API Endpoints
+
+- `GET /api/health` - Health check
+- `POST /api/waitlist/save` - Save waitlist signup
+- `GET /api/waitlist/users` - Get all users (admin)
+
+## 🎯 Features
+
+- ✅ Responsive design
+- ✅ Form validation
+- ✅ Real-time data storage
+- ✅ Referral system
+- ✅ Beta tester signup
+- ✅ Mobile-first approach
+- ✅ Free tier deployment
+
+## 📱 Technologies Used
+
+- **Frontend:** React, TypeScript, Tailwind CSS
+- **Backend:** Node.js, Express.js
+- **Database:** Firebase Firestore
+- **Hosting:** Firebase Hosting, Cloud Run
+- **Deployment:** Firebase CLI, Google Cloud SDK
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -199,10 +145,10 @@ npm start
 4. Test thoroughly
 5. Submit a pull request
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License.
 
-## Support
+## 🆘 Support
 
 For support or questions, please contact the development team.

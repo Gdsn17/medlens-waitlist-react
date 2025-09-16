@@ -1,4 +1,4 @@
-# Use Node.js 18 Alpine as base image
+# Use Node.js 18 Alpine image
 FROM node:18-alpine
 
 # Set working directory
@@ -21,12 +21,16 @@ RUN adduser -S nodejs -u 1001
 RUN chown -R nodejs:nodejs /app
 USER nodejs
 
-# Expose port
-EXPOSE 5001
+# Expose port 8080 (Cloud Run requirement)
+EXPOSE 8080
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:5001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+  CMD node -e "require('http').get('http://localhost:8080/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

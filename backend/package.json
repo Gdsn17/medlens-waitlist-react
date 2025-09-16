@@ -1,29 +1,37 @@
 {
-  "name": "backend",
+  "name": "medlens-waitlist-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "MedLens Waitlist Backend API",
+  "main": "server.js",
   "scripts": {
-    "start": "node server-web.js",
-    "dev": "nodemon server-web.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=production node server.js",
+    "dev": "NODE_ENV=development nodemon server.js",
+    "build": "echo 'No build step required for Node.js'",
+    "lint": "echo 'No linting configured'",
+    "test": "echo 'No tests configured'"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "medlens",
+    "waitlist",
+    "api",
+    "firebase",
+    "medical",
+    "education"
+  ],
+  "author": "MedLens Team",
+  "license": "MIT",
   "dependencies": {
-    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
-    "express": "^5.1.0",
-    "firebase": "^12.2.1",
-    "firebase-admin": "^13.5.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.18.1"
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "firebase": "^10.7.1",
+    "firebase-admin": "^13.5.0"
   },
   "devDependencies": {
-    "@types/node": "^24.3.1",
-    "nodemon": "^3.1.10",
-    "typescript": "^5.9.2"
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
